@@ -70,7 +70,7 @@ AX_CHECK_COMPILE_FLAG([-fno-strict-aliasing],
                       [LIBPYCSA_CXXFLAGS="-fno-strict-aliasing"], [])
 
 # FIXME: this means that --without-python make will not recurse into libpycsa subdir
-if test "x$have_python" = "xyes"; then
+if test "x$HAVE_LIBNEUROSIM" != "xno"; then
     LIBPYCSA_SUBDIR="libpycsa"
 else
     LIBPYCSA_SUBDIR=""
