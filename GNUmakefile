@@ -6,6 +6,7 @@ SPECIAL := bootstrap configure debian-package help
 
 # If the user didn't specify any goals, default to "all"
 DEFAULT_GOAL := all
+.DEFAULT_GOAL := $(DEFAULT_GOAL)
 
 .PHONY: $(SPECIAL) $(DEFAULT_GOAL)
 
