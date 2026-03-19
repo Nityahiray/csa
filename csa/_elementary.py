@@ -19,6 +19,7 @@
 import random
 import numpy
 import copy
+import hashlib
 
 from . import connset as cs
 from . import intervalset as iset
@@ -56,7 +57,7 @@ class OneToOne (cs.Mask):
 class ConstantRandomMask (cs.Mask):
     tag = 'randomMask'
     
-    def __init__ (self, p):
+    def __init__ (self, p:float, seed: int = None):
         cs.Mask.__init__ (self)
         self.p = p
         self.state = random.getstate ()
@@ -151,6 +152,7 @@ class SampleNRandomMask (cs.Finite,cs.Mask):
         obj.perTarget = numpy.random.multinomial (obj.N, [1.0 / N1] * N1)
         return obj
 
+class BaseRandomMask(cs.Mask):
     def iterator (self, low0, high0, low1, high1, state):
         m = self.mask.set1.count (0, low1)
         
@@ -243,7 +245,7 @@ class FanInRandomMask (cs.Finite, cs.Mask):
             else:
                 seed = 'FanInRandomMask'
             # Numpy.random.seed requires an unsigned 32 bit integer
-            numpy.random.seed (hash (seed) % (numpy.iinfo(numpy.uint32).max + 1))
+            numpy.random.seed (int(hashlib.md5(seed.encode()).hexdigest(), 16) % (numpy.iinfo(numpy.uint32.max + 1)))
 
             selected = state['selected']
             obj.mask = partitions[selected]
