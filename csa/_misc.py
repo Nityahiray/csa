@@ -233,41 +233,19 @@ class RepeatMask (cs.Mask):
         self.m = mask
 
     def iterator (self, low0, high0, low1, high1, state):
-        try:
-            jj = low1
-            nextHigh1 = (low1 + self.N) / self.N * self.N
-            while nextHigh1 <= high1:
-                maskIter =  self.m.iterator (0,
-                                             self.M,
-                                             0,
-                                             self.N,
-                                             state)
-                try:
-                    (i, j) = next (maskIter)
-                    post = j
-                    while post < self.N:
-                        pre = []
-                        while j == post:
-                            pre.append (i)
-                            (i, j) = next (maskIter)
-                        ii = low0
-                        while ii < high0:
-                            for k in pre:
-                                yield (ii + k, jj + post)
-                            ii += self.M
-                        post = j
-                except StopIteration:
-                    ii = low0
-                    while ii < high0:
-                        for k in pre:
-                            yield (ii + k, jj + post)
-                        ii += self.M
-                jj = nextHigh1
-                nextHigh1 += self.N
-        except StopIteration:
-            return
-
-
+        jj = (low1 // self.N) * self.N
+        while jj < high1:
+            ii = (low0 // self.M) * self.M
+            while ii < high0:
+                maskIter = self.m.iterator (0, self.M, 0, self.N, state)
+                for (i,j) in maskIter:
+                    gi = ii + i
+                    gj = jj + j
+                    if low0 <= gi < high0 and low1 <= gj < high1:
+                        yield (gi, gj)
+                ii += self.M
+            jj += self.N
+          
 class Transpose (cs.Operator):
     def __mul__ (self, other):
         c = cs.coerceCSet (other)
