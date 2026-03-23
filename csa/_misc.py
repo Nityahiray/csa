@@ -233,39 +233,22 @@ class RepeatMask (cs.Mask):
         self.m = mask
 
     def iterator (self, low0, high0, low1, high1, state):
-        try:
-            jj = low1
-            nextHigh1 = (low1 + self.N) / self.N * self.N
-            while nextHigh1 <= high1:
-                maskIter =  self.m.iterator (0,
-                                             self.M,
-                                             0,
-                                             self.N,
-                                             state)
-                try:
-                    (i, j) = next (maskIter)
-                    post = j
-                    while post < self.N:
-                        pre = []
-                        while j == post:
-                            pre.append (i)
-                            (i, j) = next (maskIter)
-                        ii = low0
-                        while ii < high0:
-                            for k in pre:
-                                yield (ii + k, jj + post)
-                            ii += self.M
-                        post = j
-                except StopIteration:
-                    ii = low0
-                    while ii < high0:
-                        for k in pre:
-                            yield (ii + k, jj + post)
-                        ii += self.M
-                jj = nextHigh1
-                nextHigh1 += self.N
-        except StopIteration:
+        template = list(self.m.iterator (0, self.M, 0, self.N, state))
+        if not template:
             return
+        k_min = low0 // self.M
+        k_max = (high0 - 1) // self.M
+        l_min = low1 // self.N
+        l_max = (high1 - 1) // self.N
+        for l in range (l_min, l_max + 1):
+            for ti, tj in template:
+                jj = tj + 1 * self.N
+                if not (low1 <= jj < high1):
+                    continue
+                for k in range (k_min, k_max + 1):
+                    ii = ti + k * self.M
+                    if low0 <= ii < high0:
+                        yield (ii, jj)
 
 
 class Transpose (cs.Operator):
